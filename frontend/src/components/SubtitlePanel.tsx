@@ -20,20 +20,28 @@ export default function SubtitlePanel({ segments }: Props) {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [segments]);
 
+  // 获取当前显示的最后一条（interim 或最新 final）
+  const lastSegment = segments.length > 0 ? segments[segments.length - 1] : null;
+
   return (
     <div className="subtitle-panel">
-      {segments.length === 0 && (
+      {!lastSegment && (
         <div className="subtitle-placeholder">
           等待字幕...
         </div>
       )}
-      {segments.map((seg) => (
-        <div key={seg.id} className={`subtitle-item ${statusClass(seg.status)}`}>
-          <span className="subtitle-text">{seg.translatedText || seg.sourceText}</span>
-          {seg.status === 'interim' && <span className="subtitle-badge">识别中</span>}
-          {seg.status === 'corrected' && <span className="subtitle-badge corrected">已修正</span>}
+      {lastSegment && (
+        <div className={`subtitle-item ${statusClass(lastSegment.status)}`}>
+          {lastSegment.sourceText && (
+            <div className="subtitle-source">{lastSegment.sourceText}</div>
+          )}
+          <div className="subtitle-translated">
+            {lastSegment.translatedText || '...'}
+          </div>
+          {lastSegment.status === 'interim' && <span className="subtitle-badge">识别中</span>}
+          {lastSegment.status === 'corrected' && <span className="subtitle-badge corrected">已修正</span>}
         </div>
-      ))}
+      )}
       <div ref={bottomRef} />
     </div>
   );

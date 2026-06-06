@@ -5,10 +5,18 @@ from openai import OpenAI
 from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL
 from context_manager import ContextManager
 
-client = OpenAI(
-    api_key=DEEPSEEK_API_KEY,
-    base_url=DEEPSEEK_BASE_URL,
-)
+_client: OpenAI | None = None
+
+
+def get_client() -> OpenAI | None:
+    """延迟初始化 DeepSeek 客户端"""
+    global _client
+    if _client is None and DEEPSEEK_API_KEY:
+        _client = OpenAI(
+            api_key=DEEPSEEK_API_KEY,
+            base_url=DEEPSEEK_BASE_URL,
+        )
+    return _client
 
 TRANSLATION_SYSTEM_PROMPT = """你是一个专业的中文同声传译助手。请将以下英文实时翻译成中文。
 
@@ -55,7 +63,10 @@ async def translate(source_text: str, context: dict) -> str:
     user_prompt = build_user_prompt(source_text, context)
 
     try:
-        response = client.chat.completions.create(
+        c = get_client()
+        if c is None:
+            return f"[Mock] {source_text}"
+        response = c.chat.completions.create(
             model=DEEPSEEK_MODEL,
             messages=[
                 {"role": "system", "content": TRANSLATION_SYSTEM_PROMPT},
@@ -81,7 +92,10 @@ async def correct_recent(context: ContextManager, target_id: str) -> dict | None
     user_prompt += "\n请根据上下文修正之前的翻译，使其更准确自然。"
 
     try:
-        response = client.chat.completions.create(
+        c = get_client()
+        if c is None:
+            return None
+        response = c.chat.completions.create(
             model=DEEPSEEK_MODEL,
             messages=[
                 {"role": "system", "content": TRANSLATION_SYSTEM_PROMPT},

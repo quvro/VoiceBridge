@@ -1,11 +1,11 @@
 /** 音频采集 Hook */
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback } from 'react';
 
 export function useAudioCapture() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const workletNodeRef = useRef<AudioWorkletNode | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
-  const [isCapturing, setIsCapturing] = useState(false);
+  const capturingRef = useRef(false);
 
   const onPcmDataRef = useRef<((data: ArrayBuffer) => void) | null>(null);
 
@@ -13,11 +13,14 @@ export function useAudioCapture() {
     videoElement: HTMLVideoElement,
     onPcmData: (data: ArrayBuffer) => void
   ) => {
-    if (isCapturing) return;
+    if (capturingRef.current) return;
+    capturingRef.current = true;
 
     onPcmDataRef.current = onPcmData;
 
-    const ctx = new AudioContext({ sampleRate: 48000 });
+    // 使用浏览器默认采样率，AudioWorklet 会自动检测并降采样
+    const ctx = new AudioContext();
+    await ctx.resume(); // 现代浏览器默认挂起，需手动恢复
     audioContextRef.current = ctx;
 
     // 加载 AudioWorklet
@@ -37,9 +40,7 @@ export function useAudioCapture() {
 
     source.connect(workletNode);
     workletNode.connect(ctx.destination);
-
-    setIsCapturing(true);
-  }, [isCapturing]);
+  }, []);
 
   const stop = useCallback(() => {
     sourceRef.current?.disconnect();
@@ -48,8 +49,8 @@ export function useAudioCapture() {
     sourceRef.current = null;
     workletNodeRef.current = null;
     audioContextRef.current = null;
-    setIsCapturing(false);
+    capturingRef.current = false;
   }, []);
 
-  return { start, stop, isCapturing };
+  return { start, stop };
 }

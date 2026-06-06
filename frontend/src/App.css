@@ -159,37 +159,30 @@
   border: 1px solid #30363d;
   border-radius: 8px;
   padding: 16px;
-  min-height: 120px;
-  max-height: 400px;
+  min-height: 100px;
+  max-height: 200px;
   overflow-y: auto;
 }
 
 .subtitle-placeholder {
   text-align: center;
   color: #484f58;
-  padding: 40px 0;
+  padding: 30px 0;
   font-size: 14px;
 }
 
 .subtitle-item {
-  padding: 8px 12px;
-  margin-bottom: 6px;
+  padding: 10px 14px;
   border-radius: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background 0.3s;
+  position: relative;
 }
 
 .subtitle-interim {
   background: rgba(108, 92, 231, 0.1);
-  color: #8b949e;
-  font-style: italic;
 }
 
 .subtitle-final {
   background: rgba(63, 185, 80, 0.08);
-  color: #e1e4e8;
 }
 
 .subtitle-corrected {
@@ -197,21 +190,27 @@
   animation: highlight 2s ease;
 }
 
-@keyframes highlight {
-  0% { background: rgba(240, 173, 78, 0.3); }
-  100% { background: rgba(240, 173, 78, 0.05); }
+.subtitle-source {
+  font-size: 13px;
+  color: #8b949e;
+  margin-bottom: 4px;
+  line-height: 1.4;
 }
 
-.subtitle-text {
-  flex: 1;
-  font-size: 15px;
+.subtitle-translated {
+  font-size: 16px;
+  color: #e1e4e8;
   line-height: 1.5;
+  font-weight: 500;
 }
 
 .subtitle-badge {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 10px;
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
   background: rgba(108, 92, 231, 0.2);
   color: #a29bfe;
   font-style: normal;
@@ -220,4 +219,9 @@
 .subtitle-badge.corrected {
   background: rgba(240, 173, 78, 0.2);
   color: #f0ad4e;
+}
+
+@keyframes highlight {
+  0% { background: rgba(240, 173, 78, 0.3); }
+  100% { background: rgba(240, 173, 78, 0.05); }
 }

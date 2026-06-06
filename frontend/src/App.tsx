@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import VideoPlayer, { type VideoPlayerHandle } from './components/VideoPlayer';
 import SubtitlePanel from './components/SubtitlePanel';
 import ControlBar from './components/ControlBar';
@@ -13,19 +13,18 @@ const WS_URL = 'ws://localhost:8000/ws';
 function App() {
   const [videoSrc, setVideoSrc] = useState('/sample.mp4');
   const [urlInput, setUrlInput] = useState('');
-  const [isTranslating, setIsTranslating] = useState(false);
   const [segments, setSegments] = useState<SubtitleSegment[]>([]);
 
   const videoPlayerRef = useRef<VideoPlayerHandle>(null);
   const { start: startCapture, stop: stopCapture } = useAudioCapture();
-  const { connect, disconnect, sendAudio, sendConfig, sendPause, sendClear, connected } =
-    useWebSocket();
+  const {
+    connect, disconnect, sendAudio, sendConfig, sendClear, connected,
+  } = useWebSocket();
 
-  // 字幕处理
+  // ---- 字幕处理 ----
   const handleSubtitle = useCallback((seg: SubtitleSegment) => {
     setSegments((prev) => {
       if (seg.id === 'interim') {
-        // 替换或添加 interim
         const withoutInterim = prev.filter((s) => s.status !== 'interim');
         return [...withoutInterim, seg];
       }
@@ -47,44 +46,41 @@ function App() {
     setSegments([]);
   }, []);
 
-  // 开始翻译
-  const handleStart = useCallback(() => {
+  // ---- 页面加载时自动连接 WebSocket ----
+  useEffect(() => {
+    connect(WS_URL, handleSubtitle, handleCorrection, handleClear);
+    return () => disconnect();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ---- 视频播放 → 自动开始采集；暂停 → 自动停止 ----
+  const handleVideoPlay = useCallback(() => {
     const video = videoPlayerRef.current?.getVideoElement();
     if (!video) return;
 
-    // 连接 WebSocket
-    connect(WS_URL, handleSubtitle, handleCorrection, handleClear);
-
-    // 开始音频采集
     startCapture(video, (pcmData) => {
       sendAudio(pcmData);
     });
+  }, [startCapture, sendAudio]);
 
-    video.play();
-    setIsTranslating(true);
-  }, [connect, startCapture, sendAudio, handleSubtitle, handleCorrection, handleClear]);
-
-  // 暂停翻译
-  const handlePause = useCallback(() => {
-    sendPause();
+  const handleVideoPause = useCallback(() => {
     stopCapture();
-    setIsTranslating(false);
-  }, [sendPause, stopCapture]);
+    // 不清空 segments，保留最后一条字幕
+  }, [stopCapture]);
 
-  // 清空字幕
+  // ---- 清空字幕 ----
   const handleClearSubtitles = useCallback(() => {
     sendClear();
     setSegments([]);
   }, [sendClear]);
 
-  // 加载视频
+  // ---- 加载视频 URL ----
   const handleLoadVideo = () => {
     if (urlInput.trim()) {
       setVideoSrc(urlInput.trim());
     }
   };
 
-  // 配置变更
+  // ---- 配置变更 ----
   const handleConfigChange = (topic: string, glossary: Glossary) => {
     sendConfig(topic, glossary);
   };
@@ -107,19 +103,21 @@ function App() {
         <button className="btn" onClick={handleLoadVideo}>加载</button>
       </section>
 
-      <VideoPlayer ref={videoPlayerRef} src={videoSrc} />
+      <VideoPlayer
+        ref={videoPlayerRef}
+        src={videoSrc}
+        onPlay={handleVideoPlay}
+        onPause={handleVideoPause}
+      />
 
       <ControlBar
-        isCapturing={isTranslating}
         connected={connected}
-        onStart={handleStart}
-        onPause={handlePause}
         onClear={handleClearSubtitles}
       />
 
-      <ConfigPanel onConfigChange={handleConfigChange} />
-
       <SubtitlePanel segments={segments} />
+
+      <ConfigPanel onConfigChange={handleConfigChange} />
     </div>
   );
 }

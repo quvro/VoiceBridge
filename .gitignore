@@ -24,5 +24,8 @@ Thumbs.db
 # Build
 frontend/dist/
 
+# Sample media
+frontend/public/*.mp4
+
 # Plan（不上传）
 plan.md
