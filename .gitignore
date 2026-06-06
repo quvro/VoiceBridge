@@ -1,0 +1,28 @@
+# Dependencies
+frontend/node_modules/
+
+# Python
+backend/__pycache__/
+backend/*.pyc
+backend/.venv/
+backend/venv/
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Claude
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+frontend/dist/
+
+# Plan（不上传）
+plan.md

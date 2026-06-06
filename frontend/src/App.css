@@ -1,0 +1,223 @@
+/* VoiceBridge App Styles */
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* Header */
+.app-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.app-header h1 {
+  font-size: 28px;
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.app-header .subtitle {
+  font-size: 14px;
+  color: #8b949e;
+}
+
+/* URL Bar */
+.url-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.url-bar input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  background: #161b22;
+  color: #e1e4e8;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.url-bar input:focus {
+  border-color: #6c5ce7;
+}
+
+/* Video */
+.video-container {
+  margin-bottom: 16px;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #6c5ce7;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #5a4bd1;
+}
+
+.btn-warning {
+  background: #f0ad4e;
+  color: #000;
+}
+
+.btn-secondary {
+  background: #30363d;
+  color: #e1e4e8;
+}
+
+.btn-small {
+  padding: 6px 14px;
+  font-size: 12px;
+  background: #30363d;
+  color: #e1e4e8;
+}
+
+/* Control Bar */
+.control-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.status-indicator {
+  margin-left: auto;
+  font-size: 13px;
+}
+
+.status-indicator.connected {
+  color: #3fb950;
+}
+
+.status-indicator.disconnected {
+  color: #f85149;
+}
+
+/* Config Panel */
+.config-panel {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.config-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.config-row label {
+  min-width: 60px;
+  font-size: 13px;
+  color: #8b949e;
+  line-height: 36px;
+}
+
+.config-row input,
+.config-row textarea {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  background: #0f1117;
+  color: #e1e4e8;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+}
+
+.config-row input:focus,
+.config-row textarea:focus {
+  border-color: #6c5ce7;
+}
+
+/* Subtitle Panel */
+.subtitle-panel {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 120px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.subtitle-placeholder {
+  text-align: center;
+  color: #484f58;
+  padding: 40px 0;
+  font-size: 14px;
+}
+
+.subtitle-item {
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.3s;
+}
+
+.subtitle-interim {
+  background: rgba(108, 92, 231, 0.1);
+  color: #8b949e;
+  font-style: italic;
+}
+
+.subtitle-final {
+  background: rgba(63, 185, 80, 0.08);
+  color: #e1e4e8;
+}
+
+.subtitle-corrected {
+  background: rgba(240, 173, 78, 0.15);
+  animation: highlight 2s ease;
+}
+
+@keyframes highlight {
+  0% { background: rgba(240, 173, 78, 0.3); }
+  100% { background: rgba(240, 173, 78, 0.05); }
+}
+
+.subtitle-text {
+  flex: 1;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.subtitle-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(108, 92, 231, 0.2);
+  color: #a29bfe;
+  font-style: normal;
+}
+
+.subtitle-badge.corrected {
+  background: rgba(240, 173, 78, 0.2);
+  color: #f0ad4e;
+}
