@@ -53,13 +53,17 @@ function App() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---- 视频播放 → 自动开始采集；暂停 → 自动停止 ----
-  const handleVideoPlay = useCallback(() => {
+  const handleVideoPlay = useCallback(async () => {
     const video = videoPlayerRef.current?.getVideoElement();
     if (!video) return;
 
-    startCapture(video, (pcmData) => {
-      sendAudio(pcmData);
-    });
+    try {
+      await startCapture(video, (pcmData) => {
+        sendAudio(pcmData);
+      });
+    } catch (e) {
+      console.error('Audio capture failed:', e);
+    }
   }, [startCapture, sendAudio]);
 
   const handleVideoPause = useCallback(() => {

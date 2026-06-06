@@ -1,5 +1,7 @@
 """DeepSeek V4 Flash 翻译模块"""
+import asyncio
 import json
+
 from openai import OpenAI
 
 from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL
@@ -17,6 +19,25 @@ def get_client() -> OpenAI | None:
             base_url=DEEPSEEK_BASE_URL,
         )
     return _client
+
+
+def _call_translate(user_prompt: str) -> str:
+    """同步调用翻译 API（在线程池中执行）"""
+    c = get_client()
+    if c is None:
+        return ""
+    response = c.chat.completions.create(
+        model=DEEPSEEK_MODEL,
+        messages=[
+            {"role": "system", "content": TRANSLATION_SYSTEM_PROMPT},
+            {"role": "user", "content": user_prompt},
+        ],
+        temperature=0.3,
+        max_tokens=128,
+        stream=False,
+    )
+    return response.choices[0].message.content.strip()
+
 
 TRANSLATION_SYSTEM_PROMPT = """你是一个专业的中文同声传译助手。请将以下英文实时翻译成中文。
 
@@ -56,27 +77,15 @@ def build_user_prompt(source_text: str, context: dict) -> str:
 
 
 async def translate(source_text: str, context: dict) -> str:
-    """翻译英文文本为中文（非流式）"""
+    """翻译英文文本为中文（在线程池执行，不阻塞事件循环）"""
     if not DEEPSEEK_API_KEY:
         return f"[Mock] {source_text}"
 
     user_prompt = build_user_prompt(source_text, context)
 
     try:
-        c = get_client()
-        if c is None:
-            return f"[Mock] {source_text}"
-        response = c.chat.completions.create(
-            model=DEEPSEEK_MODEL,
-            messages=[
-                {"role": "system", "content": TRANSLATION_SYSTEM_PROMPT},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=0.3,
-            max_tokens=128,
-            stream=False,
-        )
-        return response.choices[0].message.content.strip()
+        result = await asyncio.to_thread(_call_translate, user_prompt)
+        return result or f"[Mock] {source_text}"
     except Exception as e:
         print(f"Translation error: {e}")
         return f"[Error] {source_text}"
@@ -92,21 +101,10 @@ async def correct_recent(context: ContextManager, target_id: str) -> dict | None
     user_prompt += "\n请根据上下文修正之前的翻译，使其更准确自然。"
 
     try:
-        c = get_client()
-        if c is None:
+        result = await asyncio.to_thread(_call_translate, user_prompt)
+        if not result:
             return None
-        response = c.chat.completions.create(
-            model=DEEPSEEK_MODEL,
-            messages=[
-                {"role": "system", "content": TRANSLATION_SYSTEM_PROMPT},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=0.3,
-            max_tokens=128,
-            stream=False,
-        )
-        new_translation = response.choices[0].message.content.strip()
-        updated = context.update_segment(target_id, new_translation)
+        updated = context.update_segment(target_id, result)
         if updated:
             return {
                 "id": updated.id,

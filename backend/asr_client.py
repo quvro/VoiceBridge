@@ -83,13 +83,11 @@ class TencentASRClient:
             await self._ws.send(json.dumps({"type": "end"}))
 
     async def receive_result(self) -> dict | None:
-        """接收识别结果"""
+        """接收识别结果（阻塞直到有结果或连接断开）"""
         if self._ws and self._connected:
             try:
-                response = await asyncio.wait_for(self._ws.recv(), timeout=0.1)
+                response = await self._ws.recv()
                 return json.loads(response)
-            except asyncio.TimeoutError:
-                return None
             except websockets.ConnectionClosed:
                 self._connected = False
                 return None
